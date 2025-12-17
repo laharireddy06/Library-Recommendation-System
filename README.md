@@ -11,6 +11,8 @@ The recommendation system analyzes a dataset of books to suggest relevant titles
 Data-driven Business Analyst Aspirant | Python Developer  
  Email: laharireddypa06@gmail.com.com  
  LinkedIn Profile - (https://www.linkedin.com/in/lahari-reddy-92b45b326/)  
+ Email: anagharaju05@gmail.com
+ LinkedIn Profile - (https://www.linkedin.com/in/anagha-raju-1628b4378/)
 
 # Acknowledgements
 
