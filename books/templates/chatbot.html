@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot 🤖</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+        }
+        .chat-container {
+            width: 450px;
+            margin: 60px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        #chat-box {
+            height: 350px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 12px;
+            background: #fafafa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        strong { color: #000; }
+    </style>
+</head>
+
+<body>
+
+    <div class="chat-container">
+        <h2>Chatbot 🤖</h2>
+
+        <div id="chat-box"></div>
+
+        <!-- IMPORTANT: This form must exist -->
+        <form id="chat-form">
+            <input type="text" id="user-input" placeholder="Type a message..." style="width: 70%; padding: 8px;">
+            <button type="submit" style="padding: 8px 15px;">Send</button>
+        </form>
+    </div>
+
+
+<script>
+// Attach to existing form → FIXES THE ERROR
+document.getElementById("chat-form").onsubmit = function (event) {
+    event.preventDefault();
+    sendMessage();
+};
+
+function sendMessage() {
+    const input = document.getElementById("user-input");
+    const message = input.value.trim();
+    if (!message) return;
+
+    addMessage("You", message);
+    input.value = "";
+
+    fetch("/api/chatbot/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken(),
+        },
+        body: JSON.stringify({ message })
+    })
+    .then(res => res.json())
+    .then(data => addMessage("Bot", data.response || "Bot error"))
+    .catch(() => addMessage("Bot", "Server error"));
+}
+
+function addMessage(sender, text) {
+    const box = document.getElementById("chat-box");
+    const p = document.createElement("p");
+    p.innerHTML = `<strong>${sender}:</strong> ${text}`;
+    box.appendChild(p);
+    box.scrollTop = box.scrollHeight;
+}
+
+function getCSRFToken() {
+    return document.cookie
+        .split("; ")
+        .find(row => row.startsWith("csrftoken="))
+        ?.split("=")[1];
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}All Books{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-center">All Books</h1>
+
+    {% if books %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for book in books %}
+        <div class="border rounded-lg shadow p-4 bg-white flex flex-col">
+            <img src="{{ book.image_url|default:'/static/images/default-cover.jpg' }}" 
+                 alt="{{ book.book_title }}" 
+                 class="w-full h-48 object-cover mb-3 rounded">
+            <h2 class="text-lg font-semibold mb-1">{{ book.book_title }}</h2>
+            <p class="text-gray-600 mb-1">by {{ book.book_author }}</p>
+            <p class="text-gray-500 mb-1">Published: {{ book.year_of_publication }}</p>
+            {% if book.publisher %}
+            <p class="text-gray-400 text-sm">Publisher: {{ book.publisher }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-gray-500">No books found.</p>
+    {% endif %}
+</div>
+{% endblock %}

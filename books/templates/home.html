@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - SPSU{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="flex flex-col md:flex-row items-center justify-between px-8 py-16">
+    
+    <!-- Left Section (Text Only) -->
+    <div class="w-full md:w-1/2 space-y-6">
+        <h1 id="homeHeading" class="text-5xl font-extrabold leading-tight" style="font-family: 'Georgia', serif;">
+            "Sir Padampat Singhania University"
+        </h1>
+
+        <p id="homeParagraph" class="text-lg font-semibold">
+            Central Library - Book Recommendation System <br>
+            Discover academic resources and textbooks for your courses.
+        </p>
+    </div>
+
+    <!-- Right Section (Image) -->
+<div class="w-full md:w-1/2 flex justify-center mt-8 md:mt-0">
+    <img src="{% static 'images/logo.png' %}" alt="SPSU Logo"
+         class="w-96 h-80 md:w-112 md:h-96 object-cover shadow-lg">
+</div>
+</section>
+
+{% endblock %}

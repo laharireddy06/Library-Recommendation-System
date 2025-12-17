@@ -1,0 +1,179 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Book Store{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
+</head>
+<body class="bg-blue-100 text-black transition duration-300" id="body">
+
+    <!-- Page Transition Screen -->
+    <div id="page-transition" class="fixed inset-0 bg-white z-50 opacity-0 pointer-events-none transition-opacity duration-500"></div>
+
+    <!-- Navigation Bar -->
+    <nav id="navbar" class="p-4 flex justify-between items-center bg-white shadow-md">
+        <!-- Logo -->
+        <div class="text-2xl font-bold">SPSU LIBRARY</div>
+
+        <!-- Menu Links -->
+        <div class="hidden md:flex space-x-6">
+            <a href="{% url 'home' %}" class="font-bold {% if request.path == '/' or request.path == '/home/' %}text-blue-600 text-lg border-b-2 border-blue-600{% else %}hover:text-blue-500 hover:scale-105 transition{% endif %}">
+                🏠 Home
+            </a>
+            <a href="{% url 'books' %}" class="font-bold {% if request.path == '/books/' %}text-blue-600 text-lg border-b-2 border-blue-600{% else %}hover:text-blue-500 hover:scale-105 transition{% endif %}">
+                📚 Books
+            </a>
+            <a href="{% url 'recommendation' %}" class="font-bold {% if request.path == '/recommendation/' %}text-blue-600 text-lg border-b-2 border-blue-600{% else %}hover:text-blue-500 hover:scale-105 transition{% endif %}">
+                🤖 Recommendation
+            </a>
+            <a href="{% url 'contact' %}" class="font-bold {% if request.path == '/contact/' %}text-blue-600 text-lg border-b-2 border-blue-600{% else %}hover:text-blue-500 hover:scale-105 transition{% endif %}">
+                ✉️ Contact
+            </a>
+            <a href="/chatbot/" class="flex items-center space-x-1 hover:text-blue-600 font-bold text-lg">
+                💬 <span>Chatbot</span>
+            </a>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative">
+            <form id="searchForm" action="{% url 'search_results' %}" method="get" class="flex items-center gap-2">
+                <div class="relative w-64">
+                    <input type="text" name="query" id="searchInput" class="w-full border rounded-full py-2 px-4 pl-10 bg-gray-200 text-black focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search books..." autocomplete="off" value="{{ request.GET.query|default:'' }}">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-500"></i>
+                    <ul id="suggestionsList" class="absolute w-full bg-white border border-gray-300 rounded-b-lg mt-1 z-50 hidden max-h-60 overflow-y-auto"></ul>
+                </div>
+                <button type="submit" class="ml-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition font-semibold">Go</button>
+            </form>
+        </div>
+
+        <!-- Login Button -->
+        <a href="{% url 'login' %}" class="px-4 py-2 font-semibold border border-gray-300 rounded-lg bg-white text-black hover:bg-gray-100 transition shadow-md">
+            Login
+        </a>
+    </nav>
+
+    <!-- Loader -->
+    <div id="loader" class="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
+    </div>
+
+    <!-- Main Content -->
+    {% block content %}{% endblock %}
+
+    <!-- Suggestions, Loader, Transitions JS -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Search Suggestions
+            const searchInput = document.getElementById("searchInput");
+            const suggestionsList = document.getElementById("suggestionsList");
+
+            searchInput.addEventListener("input", () => {
+                const query = searchInput.value.trim();
+                if (query.length < 2) {
+                    suggestionsList.innerHTML = "";
+                    suggestionsList.classList.add("hidden");
+                    return;
+                }
+                fetch(`/search-suggestions/?query=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsList.innerHTML = "";
+                        data.suggestions.forEach(book => {
+                            const li = document.createElement("li");
+                            li.textContent = book;
+                            li.classList.add("cursor-pointer", "hover:bg-blue-100", "px-4", "py-2");
+                            li.addEventListener("click", () => {
+                                searchInput.value = book;
+                                suggestionsList.classList.add("hidden");
+                                document.getElementById("searchForm").submit();
+                            });
+                            suggestionsList.appendChild(li);
+                        });
+                        suggestionsList.classList.remove("hidden");
+                    });
+            });
+
+            document.addEventListener("click", (e) => {
+                if (!e.target.closest("#searchForm")) {
+                    suggestionsList.classList.add("hidden");
+                }
+            });
+        });
+
+        // Loader hide on page load
+        window.addEventListener("load", () => {
+            const loader = document.getElementById("loader");
+            if (loader) loader.style.display = "none";
+        });
+
+        // Page transitions
+        const links = document.querySelectorAll("a[href]");
+        const transitionOverlay = document.getElementById("page-transition");
+
+        links.forEach(link => {
+            if (link.href.includes("#")) return;
+            link.addEventListener("click", function(e) {
+                e.preventDefault();
+                transitionOverlay.classList.remove("opacity-0", "pointer-events-none");
+                transitionOverlay.classList.add("opacity-100");
+                setTimeout(() => { window.location = this.href; }, 400);
+            });
+        });
+
+        window.addEventListener("DOMContentLoaded", () => {
+            transitionOverlay.classList.add("opacity-0");
+            setTimeout(() => transitionOverlay.classList.add("pointer-events-none"), 500);
+        });
+    </script>
+
+    <!-- ⭐ CHATBOT ADDED HERE ⭐ -->
+    <div id="chatbot-button">💬</div>
+    <div id="chatbot-popup" class="hidden">
+        <div id="chatbot-header">
+            <span>Chatbot</span>
+            <button id="chatbot-close">✖</button>
+        </div>
+        <div id="chatbot-messages"></div>
+        <div id="chatbot-input-area">
+            <input id="chatbot-input" type="text" placeholder="Type a message..." />
+            <button id="chatbot-send">Send</button>
+        </div>
+    </div>
+    <script src="{% static 'js/chatbot.js' %}"></script>
+
+    <!-- Inline Styles -->
+    <style>
+        #suggestionsList { 
+            color: black; 
+            background-color: white; 
+            border: 1px solid #ccc; 
+            font-weight: 500; 
+            font-size: 14px; 
+            max-height: 200px; 
+            overflow-y: auto; 
+        }
+        #suggestionsList li:hover { 
+            background-color: #f3f4f6; 
+            font-weight: bold; 
+        }
+        .loader { 
+            border-top-color: #3498db; 
+            animation: spin 1s infinite linear; 
+        }
+        @keyframes spin { 
+            to { transform: rotate(360deg); } 
+        }
+    </style>
+</body>
+</html>
